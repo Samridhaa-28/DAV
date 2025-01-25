@@ -10,15 +10,32 @@ st.set_page_config(page_title="KK STORES", page_icon=":bar_chart:",layout="wide"
 st.title(" :bar_chart: KK STORES")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
 
-fl = st.file_uploader(":file_folder: Upload a file",type=(["csv","txt","xlsx","xls"]))
-if fl is not None:
-    filename = fl.name
-    st.write(filename)
-    df = pd.read_csv(filename, encoding = "ISO-8859-1")
-else:
-    os.chdir(r"C:/Users/Samridhaa/OneDrive/Documents/New folder/dav/dav_package")
-    df = pd.read_csv("Sample - Superstore.csv", encoding = "ISO-8859-1")
+fl = st.file_uploader(":file_folder: Upload a file", type=["csv", "txt", "xlsx", "xls"])
 
+if fl is not None:
+    # Read the uploaded file
+    try:
+        # Check the file extension to use the appropriate reading method
+        if fl.name.endswith(".csv"):
+            df = pd.read_csv(fl, encoding="ISO-8859-1")
+        elif fl.name.endswith(".xlsx") or fl.name.endswith(".xls"):
+            df = pd.read_excel(fl)
+        elif fl.name.endswith(".txt"):
+            df = pd.read_csv(fl, delimiter="\t", encoding="ISO-8859-1")  # Assuming tab-delimited for .txt files
+        else:
+            st.error("Unsupported file type!")
+        st.write(f"File uploaded: {fl.name}")
+        st.dataframe(df)  # Display the dataframe
+    except Exception as e:
+        st.error(f"Error reading file: {e}")
+else:
+    # Default file loading if no file is uploaded
+    try:
+        df = pd.read_csv("Sample - Superstore.csv", encoding="ISO-8859-1")
+        st.write("Using default file: Sample - Superstore.csv")
+        st.dataframe(df)  # Display the dataframe
+    except Exception as e:
+        st.error(f"Error loading default file: {e}")
 col1, col2 = st.columns((2))
 
 df["Order Date"] = pd.to_datetime(df["Order Date"], format="%d-%m-%Y")
